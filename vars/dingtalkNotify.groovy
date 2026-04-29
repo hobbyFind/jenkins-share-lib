@@ -3,7 +3,7 @@ def call(Map config = [:]) {
     def buildUser = config.buildUser ?: env.BUILD_USER ?: '未知用户'
     def imageTag = config.imageTag ?: env.IMAGETAG ?: '无'
 	def namespace = config.namespace ?: env.NAMESPACE ?: '无'
-	def serviceName = config.serviceName ?: 'env.SERVICE_NAME' ?: '无'
+	def serviceName = config.serviceName ?: env.SERVICE_NAME ?: '无'
     def webhookUrl = config.webhookUrl ?: env.WEBHOOK // 优先使用传入的 webhook，其次使用环境变量
     def buildStatus = config.buildStatus ?: currentBuild.currentResult
     // 处理时间格式
@@ -20,7 +20,7 @@ def call(Map config = [:]) {
             "title": "jenkins通知",
             "text": "### <font face='楷体' color='#3399FF'> ${projectName}</font>
 > -------------------------------
-> - 状态: <font color='{statusColor}'>${statusText}</font>
+> - 状态: <font color="${statusColor}">${statusText}</font>
 > - 执行人: ${buildUser}
 > - 开始时间: ${startTime}
 > - 命名空间: ${namespace}
@@ -28,7 +28,7 @@ def call(Map config = [:]) {
 > - 镜像标签: ${imageTag}
 > - 结束时间: ${endTime}
 > -------------------------------
-> 服务版本更新成功，请关注服务运行状态"
+> 服务版本更新${statusText}，请关注服务运行状态"
         },
         "at": {
             "atMobiles": [],
