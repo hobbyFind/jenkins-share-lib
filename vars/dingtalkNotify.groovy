@@ -1,10 +1,10 @@
 def call(Map config = [:]) {
     def projectName = config.projectName ?: env.JOB_NAME
     def buildUser = config.buildUser ?: env.BUILD_USER ?: '未知用户'
-    def imageTag = config.imageTag ?: '无'
-	def namespace = config.namespace ?: '无'
-	def serviceName = config.serviceName ?: '无'
-    def webhookUrl = config.webhookUrl ?: env.Webhook // 优先使用传入的 webhook，其次使用环境变量
+    def imageTag = config.imageTag ?: env.IMAGETAG ?: '无'
+	def namespace = config.namespace ?: env.NAMESPACE ?: '无'
+	def serviceName = config.serviceName ?: 'env.SERVICE_NAME' ?: '无'
+    def webhookUrl = config.webhookUrl ?: env.WEBHOOK // 优先使用传入的 webhook，其次使用环境变量
     def buildStatus = config.buildStatus ?: currentBuild.currentResult
     // 处理时间格式
     def endTime = new Date().format("yyyy-MM-dd HH:mm:ss")
