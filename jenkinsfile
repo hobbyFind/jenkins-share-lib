@@ -1,0 +1,73 @@
+@Library('my-shared-lib') _
+import com.company.utils.Logger
+
+// 调用库的示例
+
+pipeline {
+    agent any
+    
+    environment {
+        APP_NAME = 'my-java-app'
+        TAG = "${BUILD_NUMBER}"
+        REGISTRY = 'harbor.mycompany.com'
+        PROJECT = 'backend'
+    }
+
+    stages {
+        stage('Cleanup') {
+            steps {
+                // 调用封装好的步骤，传入脚本名和参数
+                runScript(
+                    name: 'cleanup.sh',
+                    args: '--env production --force'
+                )
+            }
+        }
+        
+        stage('Build & Push Image') {
+            steps {
+                script {
+                    // 1. 登录
+                    dockerOps.login(
+                        registry: env.REGISTRY, 
+                        credentialsId: 'harbor-cred-id'
+                    )
+                    
+                    // 2. 构建并推送
+                    def fullImage = dockerOps.buildAndPush(
+                        registry: env.REGISTRY,
+                        project: env.PROJECT,
+                        appName: env.APP_NAME,
+                        tag: env.TAG,
+                        dockerfilePath: 'Dockerfile'
+                    )
+                    
+                    // 将完整镜像地址存入环境变量供后续使用
+                    env.FULL_IMAGE = fullImage
+                    Logger.info("镜像以存入环境变量")
+                }
+            }
+        }
+        
+        stage('Deploy to K8s') {
+            steps {
+                script {
+                    // 3. 部署 (注意：k8sDeploy 使用了 call 方法，所以可以直接当函数名调用)
+                    k8sDeploy(
+                        kubeConfigId: 'k8s-admin-config',
+                        namespace: 'production',
+                        deploymentName: env.APP_NAME,
+                        image: env.FULL_IMAGE,
+                        timeout: 3
+                    )
+                }
+            }
+        }
+    }
+    
+    post {
+        failure {
+            loggerUtils.error("流水线执行失败，请检查日志！")
+        }
+    }
+}
