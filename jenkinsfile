@@ -66,8 +66,43 @@ pipeline {
     }
     
     post {
+        success {
+			wrap([$class: 'BuildUser']) {
+				script {
+					currentBuild.description = "执行人: ${env.BUILD_USER} <br> 分支: ${params.Branch} <br> 服务类型: ${params.serverType} <br> 方式: ${params.Action} <br> 目标服务器: {params.Server}"
+				}
+				dingTalk(
+					projectType: 'zidingyi',
+					WEBHOOK_URL: "https://oapi.dingtalk.com/robot/send?access_token=132af8f0ce30f447549125f8d467c1f78606659ba6900ff63ff7b875c61baff8",
+					extraInfo: [
+						"服务类型": "${params.serverType}",
+						"部署环境": "${params.Server}",
+						"部署方式": "${params.Action}",
+						"构建分支": "${params.Branch}"
+					]
+					//footerTip: "[点击查看构建详情](${env.BUILD_URL})"
+				)
+			}
+        }
         failure {
-            loggerUtils.error("流水线执行失败，请检查日志！")
+			wrap([$class: 'BuildUser']) {
+				script {
+					currentBuild.description = "执行人: ${env.BUILD_USER} "
+				}
+				dingTalk(
+					projectType: 'zidingyi',
+					isAtAll: true,
+					//atMobiles: [""],
+					WEBHOOK_URL: "",
+					extraInfo: [
+						"服务类型": "${params.serverType}",
+						"部署环境": "${params.Server}",
+						"部署方式": "${params.Action}",
+						"构建分支": "${params.Branch}"
+					],
+					footerTip: "当前任务失败咯，请前往控制台查看详情"
+				)
+			}
         }
     }
 }
