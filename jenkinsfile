@@ -73,7 +73,7 @@ pipeline {
 				}
 				dingTalk(
 					projectType: 'zidingyi',
-					WEBHOOK_URL: "https://oapi.dingtalk.com/robot/send?access_token=132af8f0ce30f447549125f8d467c1f78606659ba6900ff63ff7b875c61baff8",
+					WEBHOOK_URL: "https://oapi.dingtalk.com/robot/send?access_token=",
 					extraInfo: [
 						"服务类型": "${params.serverType}",
 						"部署环境": "${params.Server}",
