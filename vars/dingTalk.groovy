@@ -2,7 +2,7 @@ def call(Map config = [:]) {
     // 1. 基础参数解析
     def projectName   = config.projectName ?: env.JOB_NAME ?: 'Unknown'
     def buildUser     = config.buildUser ?: env.BUILD_USER ?: '系统触发'
-    def WEBHOOK_URL = config.WEBHOOK_URL ?: '123456'
+    def webhookUrl = config.webhookUrl ?: '123456'
     def buildStatus   = config.buildStatus ?: currentBuild.currentResult
     def duration      = config.duration ?: currentBuild.durationString?.replace(' and counting', '') ?: '未知'
     
@@ -88,9 +88,8 @@ ${markdownBody}
 
     // 发送 HTTP POST 请求给钉钉机器人
     try {
-		def url = new URL(WEBHOOK_URL)
 		httpRequest(
-			url: WEBHOOK_URL,
+			url: webhookUrl,
 			httpMode: 'POST',
 			contentType: 'APPLICATION_JSON_UTF8',
 			requestBody: payload,
